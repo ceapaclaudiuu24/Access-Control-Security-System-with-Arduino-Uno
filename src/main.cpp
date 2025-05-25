@@ -2,31 +2,27 @@
 #include "Keypad4x4.h"
 #include "Ultrasonic.h"
 #include "Buzzer.h"
+#include "ServoPWM.h"
 
 Keypad4x4 keypad;
-Ultrasonic us; // HC-SR04: trig = PB2 (pin 10), echo = PB3 (pin 11)
-Buzzer bz;     // buzzer pe pin 13 (PB5) – toggling în Timer2 ISR
+Ultrasonic us;  // HC-SR04: trig = PB2 (pin 10), echo = PB3 (pin 11)
+Buzzer bz;      // buzzer pe pin 13 (PB5) – toggling în Timer2 ISR
+ServoPWM servo; // servo pe OC1A (D9)
 
 // parametri configurabili
 static constexpr uint16_t PRESENCE_MAX_MM = 500;      // < 50 cm activeaza sistemul
 static constexpr uint32_t PRESENCE_TIMEOUT = 15000UL; // 15 s fara mişcare - idle
 static constexpr uint16_t DIST_CHECK_MS = 300;        // cat de des citim senzorul
 static constexpr char CORRECT_CODE[] = "1234";        // PIN
+static constexpr uint8_t SERVO_OPEN = 140;
+static constexpr uint8_t SERVO_CLOSE = 25;
 
 // state
 bool presence = false;
+bool doorOpen = false;
 uint32_t lastPresenceMS = 0;
 uint32_t lastDistCheck = 0;
 String entered;
-
-void setup()
-{
-  Serial.begin(9600);
-  us.begin();
-  bz.begin();
-
-  Serial.println(F("Asteptare detectie prezenta (< 50 cm)..."));
-}
 
 void beepKey() { bz.tone(500, 100); }
 void beepSuccess()
@@ -37,6 +33,17 @@ void beepSuccess()
 }
 void beepFailure() { bz.tone(400, 600); }
 void beepCloseDoor() { bz.tone(1000, 200); }
+
+void setup()
+{
+  Serial.begin(9600);
+  us.begin();
+  bz.begin();
+  servo.begin();
+  servo.setAngle(SERVO_CLOSE);
+
+  Serial.println(F("Asteptare detectie prezenta (< 50 cm)..."));
+}
 
 void loop()
 {
@@ -95,6 +102,11 @@ void loop()
   {
     if (entered == CORRECT_CODE)
     {
+      if (!doorOpen)
+      {
+        servo.setAngle(SERVO_OPEN);
+        doorOpen = true;
+      }
       beepSuccess();
       Serial.println(F("Acces PERMIS! Usa deschisa."));
     }
@@ -107,6 +119,11 @@ void loop()
   }
   else if (k == 'C')
   {
+    if (doorOpen)
+    {
+      servo.setAngle(SERVO_CLOSE);
+      doorOpen = false;
+    }
     beepCloseDoor();
     Serial.println(F("Usa inchisa."));
     entered = "";
