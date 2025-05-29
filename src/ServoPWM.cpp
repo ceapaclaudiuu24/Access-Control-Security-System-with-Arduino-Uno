@@ -17,3 +17,14 @@ void ServoPWM::setAngle(uint8_t deg)
     uint16_t pwm = kMin + ((uint32_t)(kMax - kMin) * deg) / 180;
     OCR1A = pwm;
 }
+
+void ServoPWM::attach()
+{
+    DDRB |= (1 << PB1);
+    TCCR1A |= (1 << COM1A1);
+}
+void ServoPWM::detach()
+{
+    TCCR1A &= ~(1 << COM1A1);
+    DDRB &= ~(1 << PB1);
+}

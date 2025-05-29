@@ -71,7 +71,7 @@ void AccessCtrl::task()
         if (!presence && doorOpen && noPresenceSince &&
             (now - noPresenceSince >= AUTO_CLOSE_MS))
         {
-            Serial.println(F("Fara prezenta > 30 s → usa se inchide automat."));
+            Serial.println(F("Fara prezenta > 30 s - usa se inchide automat."));
             closeDoor();
             noPresenceSince = 0;
         }
@@ -195,6 +195,7 @@ void AccessCtrl::task()
             tmpNew = "";
             lcd.clear();
             lcd.print(0, 0, "Door is OPEN");
+            lcd.print(0, 1, "A=chg,B/C=lock");
             mode = Mode::DOOR_OPEN;
         }
         break;
@@ -203,10 +204,10 @@ void AccessCtrl::task()
 
 void AccessCtrl::openDoor()
 {
+    beepSuccess();
     sv.setAngle(SERVO_OPEN);
     doorOpen = true;
     eeprom_write_byte(&eeDoorState, 1);
-    beepSuccess();
     lcd.clear();
     lcd.print(0, 0, "Door OPEN");
     lcd.print(0, 1, "A=chg,B/C=lock");
@@ -215,10 +216,10 @@ void AccessCtrl::openDoor()
 
 void AccessCtrl::closeDoor()
 {
+    beepCloseDoor();
     sv.setAngle(SERVO_CLOSE);
     doorOpen = false;
     eeprom_write_byte(&eeDoorState, 0);
-    beepCloseDoor();
 
     if (presence)
     {

@@ -24,7 +24,7 @@ private:
 
     /* parametri */
     static constexpr uint16_t PRES_MM = 500;
-    static constexpr uint32_t PRES_TO_MS = 15000UL;
+    static constexpr uint32_t PRES_TO_MS = 30000UL;
     static constexpr uint32_t AUTO_CLOSE_MS = 5000UL;
     static constexpr uint16_t DIST_INT_MS = 300;
     static constexpr uint8_t SERVO_OPEN = 140;

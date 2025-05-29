@@ -7,6 +7,8 @@ class ServoPWM
 public:
     void begin(); // initializeaza Timer1
     void setAngle(uint8_t deg);
+    void attach();
+    void detach();
 
 private:
     static constexpr uint16_t kMin = 2000; // 1 ms prescaler 8 (16 MHz)
